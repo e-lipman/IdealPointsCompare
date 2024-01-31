@@ -66,6 +66,8 @@ List run_sampler(const LogicalMatrix y_raw, const LogicalMatrix missing,
     if(pp_x == NULL && xflag==1){ exit(1); }
     
     /*params to store*/
+    NumericMatrix alfOut(iter, J);
+    NumericMatrix muOut(iter, J);
     NumericMatrix beta0Out(iter, I);
     NumericMatrix beta1Out(iter, I);
     LogicalMatrix zetaOut(iter, I);
@@ -129,7 +131,7 @@ List run_sampler(const LogicalMatrix y_raw, const LogicalMatrix missing,
                               &pp_x->accept_count, 
                               &pp_x->accept_count2, 
                               &pp_x->accept_count3, 
-                              int_prior_scale);
+                              int_prior_scale, false);
         } else {
           update_theta_bb(pp->zeta, pp->theta, theta_a, theta_b); 
         }
@@ -140,6 +142,8 @@ List run_sampler(const LogicalMatrix y_raw, const LogicalMatrix missing,
       
       /* update outputs */
       if (k>=burnin){
+          alfOut(k-burnin,_) = pp->alf;
+          muOut(k-burnin,_) = pp->mu;
           beta0Out(k-burnin,_) = pp->beta(_,0);
           beta1Out(k-burnin,_) = pp->beta(_,1);
           zetaOut(k-burnin,_) = pp->zeta;
@@ -177,6 +181,8 @@ List run_sampler(const LogicalMatrix y_raw, const LogicalMatrix missing,
       
       return List::create(Named("beta0") = beta0Out, 
                           Named("beta1") = beta1Out,
+                          Named("alf") = alfOut,
+                          Named("mu") = muOut,
                           Named("zeta") = zetaOut,
                           //Named("theta") = thetaOut,
                           Named("lpost") = lpost,
@@ -195,6 +201,8 @@ List run_sampler(const LogicalMatrix y_raw, const LogicalMatrix missing,
     } else {
       return List::create(Named("beta0") = beta0Out, 
                           Named("beta1") = beta1Out,
+                          Named("alf") = alfOut,
+                          Named("mu") = muOut,
                           Named("zeta") = zetaOut,
                           Named("theta") = thetaOut,
                           Named("lpost") = lpost);
@@ -207,7 +215,8 @@ List run_covreg_only(Rcpp::LogicalVector &zeta,
                      arma::mat &x,
                      int iter, int burnin, int thin, int progress,
                      int eps_init_method = 0, 
-                     bool quiet=false){
+                     bool quiet=false,
+                     double fix_int=0){
   
   int I = zeta.length();
     
@@ -220,11 +229,14 @@ List run_covreg_only(Rcpp::LogicalVector &zeta,
   if (int_prior_scale_raw==0){
     int_prior_scale=get_scale_boonstra(int_prior_fam, I, 0.01);
   }
-  Rcout << "Intercept prior: family=" << int_prior_fam  << ", scale=" << int_prior_scale << std::endl;
+  if (not quiet){
+    Rcout << "Intercept prior: family=" << int_prior_fam  << ", scale=" << int_prior_scale << std::endl;
+  }
   
   // initialize
   ParametersHier *pp;
   pp = new ParametersHier(I, p, x, eps_init_method);
+  if (fix_int!=0){pp->intercept=fix_int;}
   
   NumericMatrix thetaOut (iter, I);
   NumericMatrix etaOut (iter, p);
@@ -250,7 +262,8 @@ List run_covreg_only(Rcpp::LogicalVector &zeta,
                        &pp->accept_count, 
                        &pp->accept_count2, 
                        &pp->accept_count3, 
-                       int_prior_scale);
+                       int_prior_scale,
+                       fix_int);
     }
     if (k>=burnin){
       lpost[k-burnin] = compute_lpost_zeta_hier(I, p, zeta, pp-> eps, 
@@ -275,52 +288,50 @@ List run_covreg_only(Rcpp::LogicalVector &zeta,
 }
 
 
+//[[Rcpp::export]]
+List run_covreg_only_multi(Rcpp::LogicalMatrix &zeta,  
+                           arma::mat &x,  
+                           int steps, int progress,  
+                           int eps_init_method = 0){
+ 
+  int I = zeta.ncol();
+  int iter = zeta.nrow();
+  int p = x.n_cols;
+  Rcout << "I: " << I << " iter: " << iter  <<" p: " << p << std::endl;
+ 
+  // initialize
+  NumericMatrix thetaOut (iter, I);
+  NumericMatrix etaOut (iter, p);
+  LogicalMatrix epsOut (iter, p);
+  NumericVector interceptOut (iter);
+  
+  NumericVector theta (I);
+  LogicalVector eps (p);
+  NumericVector eta (p);
+ 
+  for (int k=0; k<iter; k++){
+    if (k % progress == 0){
+      print_datetime();
+      Rcout << "iter " << k << std::endl;
+    }
+   
+    LogicalVector zeta_k = zeta(k,_);
+    List res_list = run_covreg_only(zeta_k, x,
+                               1, steps-1, 1, steps, 
+                               eps_init_method, 
+                               true);
+   
+    theta = res_list["theta"];
+    eps = res_list["eps"];
+    eta = res_list["eta"];
+    thetaOut(k,_) = theta;
+    epsOut(k,_) = eps;
+    etaOut(k,_) = eta; 
+    interceptOut[k] = res_list["intercept"];
+  }  
+  return List::create(Named("theta") = thetaOut, 
+                      Named("eta") = etaOut, 
+                      Named("eps") = epsOut,
+                      Named("intercept") = interceptOut);
+}
 
-
-
-
-// //[[Rcpp::export]]
-// List run_covreg_only_multi(Rcpp::LogicalMatrix &zeta, 
-//                            Rcpp::NumericVector &intercept,
-//                            arma::mat &x, 
-//                            int steps, int progress, 
-//                            int eps_init_method = 0){
-//   
-//   int I = zeta.ncol();
-//   int iter = zeta.nrow();
-//   int p = x.n_cols;
-//   Rcout << "I: " << I << " iter: " << iter  <<" p: " << p << std::endl;
-//   
-//   // initialize
-//   NumericMatrix thetaOut (iter, I);
-//   NumericMatrix etaOut (iter, p);
-//   LogicalMatrix epsOut (iter, p);
-//   
-//   NumericVector theta (I);
-//   LogicalVector eps (p);
-//   NumericVector eta (p);
-//   
-//   for (int k=0; k<iter; k++){
-//     if (k % progress == 0){
-//       print_datetime();
-//       Rcout << "iter " << k << std::endl;
-//     }
-//     
-//     LogicalVector zeta_k = zeta(k,_);
-//     List res_list = run_covreg_only(zeta_k, x,
-//                                1, steps-1, 1, steps, 
-//                                eps_init_method, 
-//                                true, true, intercept[k]);
-//     
-//     theta = res_list["theta"];
-//     eps = res_list["eps"];
-//     eta = res_list["eta"];
-//     thetaOut(k,_) = theta;
-//     epsOut(k,_) = eps;
-//     etaOut(k,_) = eta;
-//   }
-//   
-//   return List::create(Named("theta") = thetaOut,
-//                       Named("eta") = etaOut,
-//                       Named("eps") = epsOut);
-// }

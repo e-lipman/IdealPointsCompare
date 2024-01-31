@@ -286,7 +286,8 @@ void run_covreg_onestep(int I,
                          int *accept_count,
                          int *accept_count2,
                          int *accept_count3,
-                         double int_prior_scale){
+                         double int_prior_scale,
+                         bool fix_int){
   
   int p = eta.n_elem;
   
@@ -294,8 +295,10 @@ void run_covreg_onestep(int I,
   update_vx_zx(I, zeta, vx, zx, linpred);
   
   // update intercept
-  update_intercept(I, eps, vx, zx, intercept, linpred, 
-                   int_prior_scale, accept_count2);
+  if (!fix_int){
+    update_intercept(I, eps, vx, zx, intercept, linpred, 
+                     int_prior_scale, accept_count2);  
+  }
   
   // update g, epsilon and eta
   update_eps_eta(I, p, eps, x, vx, zx, eta, *intercept, accept_count,

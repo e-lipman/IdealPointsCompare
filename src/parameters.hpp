@@ -128,7 +128,7 @@ public:
     } else {
       throw std::invalid_argument("'eps_init_method' must be in 0,1,2");
     }
-    Rcout << eps.as_row() << std::endl;
+    //Rcout << eps.as_row() << std::endl;
     
     eta.fill(0);
     intercept=R::rnorm(0,1);

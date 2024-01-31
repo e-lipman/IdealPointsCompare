@@ -15,6 +15,7 @@ void run_covreg_onestep(int I,
                         int *accept_count,
                         int *accept_count2,
                         int *accept_count3,
-                        double int_prior_scale);
+                        double int_prior_scale,
+                        bool fix_int);
 
 #endif
