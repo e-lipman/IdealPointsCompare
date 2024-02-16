@@ -6,6 +6,21 @@ This repo is included as a submodule in the following two repos:
 
 ## Data:
 
+The input data for the XXX-th house is contained in the file `Data/inputs_XXX.RDS`. 
+
+This object contains the following elements used in the C++ modeling code:
+    
+- `y`: Outcome variable. Matrix of votes (1=yay, 0=nay, NA=absent/abstained). `y` has one row per legislator and one column per vote. Columns are sorted so that the procedural votes are grouped tpgether before the final passage votes
+
+- `missing`: Boolean matrix of same dimension as `y` indicating which elements of `y` are `NA`
+
+- `covariates`: A data frame with one row per house member (same order as rows of `y`) containing covariates for each member (used to create `X` matrix of covariates)
+
+- `gam0_maxC`: Index of last procedural vote using a base-0 index
+
+- `demLeaderC'/`repLeaderC`: Indices of Democratic and Republican party leaders, using a base-0 index
+
+
 ## R scripts:
 *`1_run_models`: Runs a single chain of a given model for a single House.*
 
@@ -47,7 +62,7 @@ This repo is included as a submodule in the following two repos:
 
 - Arguments (passed by position as command line arguments): "cong", "stage", "folder", "suffix"
 
-## C scripts (in `src`):
+## C++ scripts (in `src`):
   
 -`run_sampler.cpp`: Top-level C script to run sampler
 
