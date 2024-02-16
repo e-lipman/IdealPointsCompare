@@ -1,4 +1,8 @@
-Data and source code included as submodule in the following repos:
+This repo is included as a submodule in the following two repos:
+1. [e-lipman/XXX](<https://github.com/e-lipman/XXX>), which reproduces the results in
+[Explaining Differences in Voting Patterns Across Voting Domains Using Hierarchical Bayesian Models (Lipman, Moser, & Rodriguez, 2023)](<https://arxiv.org/abs/2312.15049>)
+3. [e-lipman/ModularBayesUSHouse](<https://github.com/e-lipman/ModularBayesUSHouse>), which reproduces the results in
+[On Data Analysis Pipelines and Modular Bayesian Modeling (Lipman & Rodriguez, 2024)](https://arxiv.org/abs/2402.04461)
 
 ## Data:
 
