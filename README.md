@@ -2,7 +2,7 @@ This repo is included as a submodule in the following two repos:
 1. [e-lipman/XXX](<https://github.com/e-lipman/XXX>), which reproduces the results in
 [Explaining Differences in Voting Patterns Across Voting Domains Using Hierarchical Bayesian Models (Lipman, Moser, & Rodriguez, 2023)](<https://arxiv.org/abs/2312.15049>) (obtains and interprets substantive results using the full model)
 3. [e-lipman/ModularBayesUSHouse](<https://github.com/e-lipman/ModularBayesUSHouse>), which reproduces the results in
-[On Data Analysis Pipelines and Modular Bayesian Modeling (Lipman & Rodriguez, 2024)](https://arxiv.org/abs/2402.04461) (Compares the full, cut, and two-step models)
+[On Data Analysis Pipelines and Modular Bayesian Modeling (Lipman & Rodriguez, 2024)](https://arxiv.org/abs/2402.04461) (compares the full, cut, and two-step models)
 
 ## Data:
 
@@ -27,24 +27,36 @@ This repo is included as a submodule in the following two repos:
 
     -`folder`: Name for top level output folder (e.x. "stage1")
 
-    -`burn` (not used for stage 2 cut): Number of burn-in iterations
+    -`burn`: (not used for stage 2 cut) Number of burn-in iterations
 
-    -`iter` (not used for stage 2 cut): Number of post burn-in iterations to save
+    -`iter`: (not used for stage 2 cut) Number of post burn-in iterations to save
 
-    -`thin` (not used for stage 2 cut): Factor by which iterations are thinned
+    -`thin`: (not used for stage 2 cut) Factor by which iterations are thinned
 
-    -`cut` (stage 2 only): Indicator for the cut model (cut=1) versus two-step model (cut=0)
+    -`cut`: (stage 2 only) Indicator for the cut model (cut=1) versus two-step model (cut=0)
   
-    -`infolder` (stage 2 only): Top=level folder from which to lead stage 1 results (e.x. "stage1")
+    -`infolder`: (stage 2 only) Top=level folder from which to lead stage 1 results (e.x. "stage1")
 
-    -`insuffix` (stage 2 only): Suffix ("_burn_iter_thin") for stage 1 results
+    -`insuffix`: (stage 2 only) Suffix ("_burn_iter_thin") for stage 1 results
 
-    -`thresh` (stage 2 of two-step only): Posterior probability threshold for determining bridges from stage 1 (e.x. 0.5)
+    -`thresh`: (stage 2 of two-step only) Posterior probability threshold for determining bridges from stage 1 (e.x. 0.5)
 
-    -`steps` (stage 2 of cut only): Number of steps in MCMC chain for each iteration of stage 1
+    -`steps`: (stage 2 of cut only) Number of steps in MCMC chain for each iteration of stage 1
 
 `2_postprocess.R `: Postprecesses results for a given model for a single House. Only needed for stage=0 and stage=1
 
 - Arguments (passed by position as command line arguments): "cong", "stage", "folder", "suffix"
 
-## C scripts:
+## C scripts (in `src`):
+  
+-`run_sampler.cpp`: Top-level C script to run sampler
+
+-`gibbs_updates.cpp`: Gibbs updates for module 1 
+
+-`covaraite_regression.cpp`: Gibbs/MH upodates for module 2
+
+-`helper_funstions.cpp`: Helper functions
+
+-`parameters.hpp`: Defines structure to hold parameters
+
+-`configs.hpp`: Static hyperparameters for the model, especially parameters and settings for hyperpriors
