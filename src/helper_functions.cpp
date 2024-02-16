@@ -2,8 +2,8 @@
 //[[Rcpp::depends(RcppArmadillo)]]
 #include "configs.hpp"
 #include "parameters.hpp"
-#include "../../helloPG/src/RNG.h" // from https://github.com/jgscott/helloPG
-#include "../../helloPG/src/PolyaGamma.h"
+#include "helloPG/RNG.h" // from https://github.com/jgscott/helloPG
+#include "helloPG/PolyaGamma.h"
 
 static double const log2pi = std::log(2.0 * M_PI);
 
