@@ -75,3 +75,6 @@ This object contains the following elements used in the C++ modeling code:
 -`parameters.hpp`: Defines structure to hold parameters
 
 -`configs.hpp`: Static hyperparameters for the model, especially parameters and settings for hyperpriors
+
+-`helloPG`: This folder contains files for generating Polya-Gamma random variables. These files are taken from 
+[jgscott/helloPG](<https://github.com/jgscott/helloPG>) (current as of 2/2024)
